@@ -9,7 +9,6 @@ for i in range(0, len(input)):
     unicode2 = mystr.int2bin(unicode10)
     oneHot = mystr.str2arr(unicode2)
     X.append(oneHot)
-    # print(input[i] + ' : ' + str(oneHot))
 
 print(X)
 

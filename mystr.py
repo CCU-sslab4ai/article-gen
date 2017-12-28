@@ -21,5 +21,14 @@ def str2arr(s):
     return arr
 
 
+def arr2str(arr):
+    strArr = map(str, arr)
+    return ''.join(strArr)
+
+
 def int2bin(i):
     return bin(i)[2:].zfill(16)
+
+
+def bin2int(b):
+    return int(b, 2)

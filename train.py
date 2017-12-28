@@ -32,5 +32,5 @@ Xnp = np.array(X, ndmin=3)
 Ynp = np.array(Y, ndmin=3)
 
 model = s2s.model2()
-model.compile('mse', optimizer='sgd')
-model.fit([Xnp, Ynp], Ynp, epochs=1)
+model.compile(loss='mse', optimizer='sgd')
+model.fit(Xnp, Ynp, epochs=1)

@@ -19,6 +19,6 @@ def model1():
 
 
 def model2():
-    model = SimpleSeq2Seq(input_dim=5, hidden_dim=10, output_length=8, output_dim=8, depth=3)
+    model = SimpleSeq2Seq(input_dim=400, hidden_dim=10, output_length=20000, output_dim=20000, depth=3)
     return model
     

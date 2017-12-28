@@ -1,6 +1,6 @@
-
 import mystr
-import seq2seq
+import s2s
+from keras.utils import plot_model
 
 input = '台灣 2040 年禁售燃油車算晚？看看其他國家時間表就知道！'
 X = []
@@ -14,5 +14,5 @@ for i in range(0, len(input)):
 
 print(X)
 
-model = seq2seq.model1()
-model.compile(optimizer='rmsprop', loss='categorical_crossentropy')
+model = s2s.model2()
+model.compile(loss='mse', optimizer='rmsprop')

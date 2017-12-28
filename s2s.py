@@ -1,5 +1,8 @@
 from keras.layers import Input, LSTM
 from keras.models import Model
+import seq2seq
+from seq2seq.models import SimpleSeq2Seq
+
 
 def model1():
     encoderInputs = Input(shape=(None, 16))
@@ -13,3 +16,9 @@ def model1():
         decoderInputs, initial_state=encoderStates)
 
     return Model([encoderInputs, decoderInputs], decoderOutputs)
+
+
+def model2():
+    model = SimpleSeq2Seq(input_dim=5, hidden_dim=10, output_length=8, output_dim=8, depth=3)
+    return model
+    

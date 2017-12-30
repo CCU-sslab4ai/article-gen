@@ -49,7 +49,7 @@ for i in range(0, len(inputArr)):
 Xnp = np.array(X)
 Ynp = np.array(Y)
 
-model = s2s.model1(input_dim=16, hidden_dim=16)
+model = s2s.model1(input_dim=16, hidden_dim=32)
 model.summary()
 model.compile(loss='categorical_crossentropy',
               optimizer='adam', metrics=['acc'])

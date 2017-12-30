@@ -31,6 +31,6 @@ for i in range(0, len(inputArr)):
 Xnp = np.array(X, ndmin=3)
 Ynp = np.array(Y, ndmin=3)
 
-model = s2s.model2()
-model.compile(loss='mse', optimizer='sgd')
-model.fit(Xnp, Ynp, epochs=1)
+model = s2s.model1(16, 359, 16)
+model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['acc'])
+model.fit(Xnp, Ynp, epochs=10)

@@ -1,24 +1,14 @@
-from keras.layers import Input, LSTM
-from keras.models import Model
-import seq2seq
-from seq2seq.models import SimpleSeq2Seq
+from keras.models import Sequential
+from keras.layers.recurrent import LSTM, GRU
+from keras.layers.wrappers import TimeDistributed
+from keras.layers.core import Dense, RepeatVector
 
+def model1(input_dim, max_out_seq_len, hidden_dim):
+    model = Sequential()
+    model.add(GRU(input_dim=input_dim, output_dim=hidden_dim, return_sequences=False))
+    model.add(Dense(hidden_dim, activation='softmax'))
+    model.add(RepeatVector(max_out_seq_len))
+    model.add(GRU(hidden_dim, return_sequences=True))
+    model.add(TimeDistributed(Dense(output_dim=input_dim, activation='softmax')))
 
-def model1():
-    encoderInputs = Input(shape=(None, 16))
-    encoderHidden = LSTM(1, return_state=True)
-    encoderOutputs, h, c = encoderHidden(encoderInputs)
-    encoderStates = [h, c]
-
-    decoderInputs = Input(shape=(None, 16))
-    decoderHidden = LSTM(1, return_sequences=True, return_state=True)
-    decoderOutputs, _, _ = decoderHidden(
-        decoderInputs, initial_state=encoderStates)
-
-    return Model([encoderInputs, decoderInputs], decoderOutputs)
-
-
-def model2():
-    model = SimpleSeq2Seq(input_dim=16, hidden_dim=16,
-                          output_length=359, output_dim=16, depth=3)
     return model

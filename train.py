@@ -18,23 +18,29 @@ csvArr = myfile.readcsv('./datasets/news20171225.csv')
 inputArr = []
 outputArr = []
 X = np.array([]).reshape(-1, MAX_INPUT)
+
+Ymatrix=[]
 Y = np.array([]).reshape(-1, MAX_OUTPUT, WORD_DIM)
 
-for i in range(0, len(csvArr)):
+print('讀取csv')
+for i in trange(0, len(csvArr)):
     inputArr.append(csvArr[i][0])
     outputArr.append(csvArr[i][2])
 
-with open('label.pickle', 'rb') as f:
-    encoder = pickle.load(f)
+f= open('label.pickle', 'rb')
+encoder = pickle.load(f)
 
-    for i in range(0, len(inputArr)):
-        print()
-        raw = array(encoder.transform(list(inputArr[i])))
-        fill = np.append(raw, np.zeros(MAX_INPUT - raw.size)).reshape(-1, MAX_INPUT)
-        X = np.append(X, fill, axis=0)
-        
-        raw = array(encoder.transform(list(inputArr[i])))
-        fill = np.append(raw, np.zeros(MAX_OUTPUT - raw.size)).reshape(-1, MAX_OUTPUT)
-        with open('onehot.pickle', 'rb') as f2:
-            onehot = pickle.load(f2)
-            val=onehot.transform(fill.reshape(fill.size, 1)) # csr_matrix
+print('將X存放至Numpy, 將Y存放至csv_matrix')
+for i in trange(0, len(inputArr)):
+    raw = array(encoder.transform(list(inputArr[i])))
+    fill = np.append(raw, np.zeros(MAX_INPUT - raw.size)).reshape(-1, MAX_INPUT)
+    X = np.append(X, fill, axis=0)
+    
+    raw = array(encoder.transform(list(inputArr[i])))
+    fill = np.append(raw, np.zeros(MAX_OUTPUT - raw.size)).reshape(-1, MAX_OUTPUT)
+    with open('onehot.pickle', 'rb') as f2:
+        onehot = pickle.load(f2)
+        val = onehot.transform(fill.reshape(fill.size, 1))  # csr_matrix
+        Ymatrix.append(val)
+
+print(len(Ymatrix))

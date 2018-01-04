@@ -3,30 +3,36 @@ import mystr
 import myfile
 import numpy as np
 import pickle
+
 from tqdm import *
 from numpy import array
 from sklearn.preprocessing import LabelEncoder
 from keras.models import Sequential
 from keras.layers import Embedding, Flatten, Dense
-from keras.callbacks import Callback, ProgbarLogger, BaseLogger
+from keras.callbacks import ModelCheckpoint
 
-MAX_INPUT = 70
-MAX_OUTPUT = 20000
+import matplotlib
+matplotlib.use('agg')
+import matplotlib.pyplot as plt
+
+MAX_INPUT = 203
+MAX_OUTPUT = 872
 WORD_DIM = 21574
+TRAIN_SIZE = 416
+VAL_SIZE = int(TRAIN_SIZE * 0.25)
 
-csvArr = myfile.readcsv('./datasets/news20171225.csv')
+csvArr = myfile.readcsv('./datasets/legend-of-the-white-snake.csv')
 
 inputArr = []
 outputArr = []
 X = np.array([]).reshape(-1, MAX_INPUT)
 
 Ymatrix = []
-Y = np.array([]).reshape(-1, MAX_OUTPUT, WORD_DIM)
 
 print('讀取csv')
 for i in trange(0, len(csvArr)):
     inputArr.append(csvArr[i][0])
-    outputArr.append(csvArr[i][2])
+    outputArr.append(csvArr[i][1])
 
 f = open('label.pickle', 'rb')
 encoder = pickle.load(f)
@@ -47,8 +53,6 @@ for i in trange(0, len(inputArr)):
         val = onehot.transform(fill.reshape(fill.size, 1))  # csr_matrix
         Ymatrix.append(val)
 
-print(len(Ymatrix))
-
 model = s2s.model1(MAX_INPUT, WORD_DIM, MAX_OUTPUT, 64)
 model.summary()
 model.compile(loss='categorical_crossentropy',
@@ -56,9 +60,42 @@ model.compile(loss='categorical_crossentropy',
 
 
 def generator(Xnp, YSparse):
-    print('開始Training...')
-    for i in trange(0, len(YSparse)):
-        yield Xnp[i].reshape(-1, MAX_INPUT), YSparse[i].toarray().reshape((-1, MAX_OUTPUT, WORD_DIM))
+    while 1:
+        for i in range(0, len(YSparse)):
+            yield Xnp[i].reshape(-1, MAX_INPUT), YSparse[i].toarray().reshape((-1, MAX_OUTPUT, WORD_DIM))
 
 
-model.fit_generator(generator(X, Ymatrix), steps_per_epoch=len(Ymatrix), epochs=1)
+Xtrain = X[:TRAIN_SIZE]
+Ytrain = Ymatrix[:TRAIN_SIZE]
+Xval = X[TRAIN_SIZE:(TRAIN_SIZE + VAL_SIZE)]
+Yval = Ymatrix[TRAIN_SIZE:(TRAIN_SIZE + VAL_SIZE)]
+# Xtest = X[TRAIN_SIZE:]
+# Ytest = Ymatrix[TRAIN_SIZE:]
+
+checkpointer = ModelCheckpoint(
+    filepath='./model/weights.hdf5', verbose=1, save_best_only=True)
+
+history = model.fit_generator(generator=generator(Xtrain, Ytrain), steps_per_epoch=TRAIN_SIZE, validation_data=generator(
+    Xval, Yval), validation_steps=VAL_SIZE, epochs=50, callbacks=[checkpointer])
+
+
+# cost = model.evaluate_generator(
+#     generator(Xtest, Ytest), steps=len(Ytest))
+# print('test cost' + str(cost))
+
+plt.plot(history.history['acc'])
+plt.plot(history.history['val_acc'])
+plt.title('model accuracy')
+plt.ylabel('accuracy')
+plt.xlabel('epoch')
+plt.legend(['train', 'val'], loc='upper left')
+plt.savefig('acc.png')
+plt.clf()
+
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.title('model loss')
+plt.ylabel('loss')
+plt.xlabel('epoch')
+plt.legend(['train', 'val'], loc='upper left')
+plt.savefig('loss.png')

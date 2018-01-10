@@ -74,9 +74,9 @@ Yval = Ymatrix[TRAIN_SIZE:(TRAIN_SIZE + VAL_SIZE)]
 # Ytest = Ymatrix[TRAIN_SIZE:]
 
 checkpointer = ModelCheckpoint(
-    filepath='./model2/weights.hdf5', verbose=1, save_best_only=True)
+    filepath='./model/weights.hdf5', verbose=1, save_best_only=True)
 
-tensorboard = TensorBoard(log_dir="./model2/logs/{}".format(time()))
+tensorboard = TensorBoard(log_dir="./model/logs/{}".format(time()))
 
 history = model.fit_generator(generator=generator(Xtrain, Ytrain), steps_per_epoch=TRAIN_SIZE, validation_data=generator(
     Xval, Yval), validation_steps=VAL_SIZE, epochs=50, callbacks=[checkpointer, tensorboard])
@@ -92,7 +92,7 @@ plt.title('model accuracy')
 plt.ylabel('accuracy')
 plt.xlabel('epoch')
 plt.legend(['train', 'val'], loc='upper left')
-plt.savefig('./model2/acc.png')
+plt.savefig('./model/acc.png')
 plt.clf()
 
 plt.plot(history.history['loss'])
@@ -101,4 +101,4 @@ plt.title('model loss')
 plt.ylabel('loss')
 plt.xlabel('epoch')
 plt.legend(['train', 'val'], loc='upper left')
-plt.savefig('./model2/loss.png')
+plt.savefig('./model/loss.png')

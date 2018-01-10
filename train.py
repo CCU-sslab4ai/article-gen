@@ -9,19 +9,20 @@ from numpy import array
 from sklearn.preprocessing import LabelEncoder
 from keras.models import Sequential
 from keras.layers import Embedding, Flatten, Dense
-from keras.callbacks import ModelCheckpoint
+from keras.callbacks import ModelCheckpoint, TensorBoard
 
+from time import time
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
 
-MAX_INPUT = 203
+MAX_INPUT = 98
 MAX_OUTPUT = 872
 WORD_DIM = 21574
-TRAIN_SIZE = 416
+TRAIN_SIZE = 408
 VAL_SIZE = int(TRAIN_SIZE * 0.25)
 
-csvArr = myfile.readcsv('./datasets/legend-of-the-white-snake.csv')
+csvArr = myfile.readcsv('./datasets/legend-of-the-white-snake2.csv')
 
 inputArr = []
 outputArr = []
@@ -73,10 +74,12 @@ Yval = Ymatrix[TRAIN_SIZE:(TRAIN_SIZE + VAL_SIZE)]
 # Ytest = Ymatrix[TRAIN_SIZE:]
 
 checkpointer = ModelCheckpoint(
-    filepath='./model/weights.hdf5', verbose=1, save_best_only=True)
+    filepath='./model2/weights.hdf5', verbose=1, save_best_only=True)
+
+tensorboard = TensorBoard(log_dir="./model2/logs/{}".format(time()))
 
 history = model.fit_generator(generator=generator(Xtrain, Ytrain), steps_per_epoch=TRAIN_SIZE, validation_data=generator(
-    Xval, Yval), validation_steps=VAL_SIZE, epochs=50, callbacks=[checkpointer])
+    Xval, Yval), validation_steps=VAL_SIZE, epochs=50, callbacks=[checkpointer, tensorboard])
 
 
 # cost = model.evaluate_generator(
@@ -89,7 +92,7 @@ plt.title('model accuracy')
 plt.ylabel('accuracy')
 plt.xlabel('epoch')
 plt.legend(['train', 'val'], loc='upper left')
-plt.savefig('acc.png')
+plt.savefig('./model2/acc.png')
 plt.clf()
 
 plt.plot(history.history['loss'])
@@ -98,4 +101,4 @@ plt.title('model loss')
 plt.ylabel('loss')
 plt.xlabel('epoch')
 plt.legend(['train', 'val'], loc='upper left')
-plt.savefig('loss.png')
+plt.savefig('./model2/loss.png')

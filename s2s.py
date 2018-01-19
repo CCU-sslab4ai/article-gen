@@ -6,7 +6,7 @@ from keras import layers
 
 def model1(INPUT_MAX_LEN, WORD_DIM, OUTPUT_MAX_LEN, HIDDEN_DIM, DEPTH=1):
     model = Sequential()
-    model.add(Embedding(WORD_DIM, HIDDEN_DIM, input_length=INPUT_MAX_LEN))
+    model.add(Embedding(WORD_DIM, HIDDEN_DIM, input_length=INPUT_MAX_LEN, mask_zero=True))
     model.add(LSTM(HIDDEN_DIM))
     model.add(layers.RepeatVector(OUTPUT_MAX_LEN))
     for _ in range(DEPTH):

@@ -56,7 +56,7 @@ for i in trange(0, len(inputArr)):
 
 model = s2s.model1(MAX_INPUT, WORD_DIM, MAX_OUTPUT, 64)
 model.summary()
-model.compile(loss='categorical_crossentropy',
+model.compile(loss='binary_crossentropy',
               optimizer='adam', metrics=['acc'])
 
 
@@ -74,12 +74,12 @@ Yval = Ymatrix[TRAIN_SIZE:(TRAIN_SIZE + VAL_SIZE)]
 # Ytest = Ymatrix[TRAIN_SIZE:]
 
 checkpointer = ModelCheckpoint(
-    filepath='./model/weights.hdf5', verbose=1, save_best_only=True)
+    filepath='./model/weights-binary_cross-epochs-100.hdf5', verbose=1, save_best_only=True)
 
 tensorboard = TensorBoard(log_dir="./model/logs/{}".format(time()))
 
 history = model.fit_generator(generator=generator(Xtrain, Ytrain), steps_per_epoch=TRAIN_SIZE, validation_data=generator(
-    Xval, Yval), validation_steps=VAL_SIZE, epochs=50, callbacks=[checkpointer, tensorboard])
+    Xval, Yval), validation_steps=VAL_SIZE, epochs=100, callbacks=[checkpointer, tensorboard])
 
 
 # cost = model.evaluate_generator(
@@ -92,7 +92,7 @@ plt.title('model accuracy')
 plt.ylabel('accuracy')
 plt.xlabel('epoch')
 plt.legend(['train', 'val'], loc='upper left')
-plt.savefig('./model/acc.png')
+plt.savefig('./model/acc-binarycross.png')
 plt.clf()
 
 plt.plot(history.history['loss'])
@@ -101,4 +101,4 @@ plt.title('model loss')
 plt.ylabel('loss')
 plt.xlabel('epoch')
 plt.legend(['train', 'val'], loc='upper left')
-plt.savefig('./model/loss.png')
+plt.savefig('./model/loss-binarycross.png')

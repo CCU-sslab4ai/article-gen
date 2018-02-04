@@ -11,6 +11,8 @@ from keras.models import Sequential
 from keras.layers import Embedding, Flatten, Dense
 from keras.callbacks import ModelCheckpoint, TensorBoard
 from keras import losses
+from keras import metrics
+from keras import backend as K
 
 from time import time
 import matplotlib
@@ -18,6 +20,7 @@ matplotlib.use('agg')
 import matplotlib.pyplot as plt
 
 MAX_INPUT = 98
+MIN_OUTPUT = 304
 MAX_OUTPUT = 872
 WORD_DIM = 21574
 TRAIN_SIZE = 408
@@ -55,9 +58,24 @@ for i in trange(0, len(inputArr)):
         val = onehot.transform(fill.reshape(fill.size, 1))  # csr_matrix
         Ymatrix.append(val)
 
+Xtrain = X[:TRAIN_SIZE]
+Ytrain = Ymatrix[:TRAIN_SIZE]
+Xval = X[TRAIN_SIZE:(TRAIN_SIZE + VAL_SIZE)]
+Yval = Ymatrix[TRAIN_SIZE:(TRAIN_SIZE + VAL_SIZE)]
+# Xtest = X[TRAIN_SIZE:]
+# Ytest = Ymatrix[TRAIN_SIZE:]
+
+
+def customLoss(Y_true, Y_pred):
+    return losses.categorical_crossentropy(Y_true[:, :MIN_OUTPUT, :], Y_pred[:, :MIN_OUTPUT, :])
+
+
+def customAcc(Y_true, Y_pred):
+    return K.sum(K.mean(K.equal(K.argmax(Y_pred[:, :MIN_OUTPUT, :], axis=2), K.argmax(Y_true[:, :MIN_OUTPUT, :], axis=2)), axis=1))
+
 model = s2s.model1(MAX_INPUT, WORD_DIM, MAX_OUTPUT, 64)
 model.summary()
-model.compile(loss='categorical_crossentropy',
+model.compile(loss=customLoss,
               optimizer='adam', metrics=['acc'])
 
 
@@ -67,20 +85,13 @@ def generator(Xnp, YSparse):
             yield Xnp[i].reshape(-1, MAX_INPUT), YSparse[i].toarray().reshape((-1, MAX_OUTPUT, WORD_DIM))
 
 
-Xtrain = X[:TRAIN_SIZE]
-Ytrain = Ymatrix[:TRAIN_SIZE]
-Xval = X[TRAIN_SIZE:(TRAIN_SIZE + VAL_SIZE)]
-Yval = Ymatrix[TRAIN_SIZE:(TRAIN_SIZE + VAL_SIZE)]
-# Xtest = X[TRAIN_SIZE:]
-# Ytest = Ymatrix[TRAIN_SIZE:]
-
 checkpointer = ModelCheckpoint(
-    filepath='./model/weights-100.hdf5', verbose=1, save_best_only=True)
+    filepath='./model/weights-customLoss.hdf5', verbose=1, save_best_only=True)
 
 tensorboard = TensorBoard(log_dir="./model/logs/{}".format(time()))
 
 history = model.fit_generator(generator=generator(Xtrain, Ytrain), steps_per_epoch=TRAIN_SIZE, validation_data=generator(
-    Xval, Yval), validation_steps=VAL_SIZE, epochs=100, callbacks=[checkpointer, tensorboard])
+    Xval, Yval), validation_steps=VAL_SIZE, epochs=100)
 
 
 # cost = model.evaluate_generator(
